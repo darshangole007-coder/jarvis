@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>J.A.R.V.I.S</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+<style>
+body {
+    background: radial-gradient(circle, #0b3c4a, #070b12);
+    font-family: Orbitron;
+    color: cyan;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+#box {
+    width: 480px;
+    height: 600px;
+    border: 1px solid cyan;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+#chat { flex: 1; overflow-y: auto; }
+input { padding: 10px; background:black; color:cyan; border:1px solid cyan; }
+button { padding:10px; background:cyan; border:none; }
+</style>
+</head>
+<body>
+<div id="box">
+<h2 style="text-align:center">J.A.R.V.I.S</h2>
+<div id="chat"></div>
+<div>
+<input id="input" placeholder="Awaiting command, sir..." />
+<button onclick="send()">▶</button>
+<button onclick="toggleMic()">🎙️</button>
+</div>
+</div>
+<script src="/static/jarvis.js"></script>
+</body>
+</html>
