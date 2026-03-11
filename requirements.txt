@@ -1,0 +1,9 @@
+flask
+flask-cors
+python-dotenv
+openai
+pyttsx3
+psutil
+screen-brightness-control
+SpeechRecognition
+PyAudio
