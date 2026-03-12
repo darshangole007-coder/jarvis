@@ -2,11 +2,10 @@ flask
 flask-cors
 python-dotenv
 openai
-pyttsx3
 psutil
 screen-brightness-control
-SpeechRecognition
 gunicorn
-pyautogui
-
-
+requests
+selenium
+webdriver-manager
+beautifulsoup4
