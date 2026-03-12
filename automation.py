@@ -8,22 +8,16 @@ import time
 import json
 import smtplib
 from email.mime.text import MIMEText
-import screen_brightness_control as sbc
-import pyautogui
 import ctypes
+import requests
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
-import pyautogui
-import requests
 
 SYSTEM = platform.system().lower()
 
-pyautogui = None
-if os.environ.get("DISPLAY"):
-    import pyautogui
-    
 # -----------------------------
 # APP REGISTRY
 # -----------------------------
@@ -47,20 +41,6 @@ APP_COMMANDS = {
     "file explorer": "explorer"
 }
 
-APP_PROCESS_NAMES = {
-    "chrome": "chrome.exe",
-    "edge": "msedge.exe",
-    "firefox": "firefox.exe",
-    "youtube": "chrome.exe",
-    "google": "chrome.exe",
-    "notepad": "notepad.exe",
-    "spotify": "spotify.exe",
-    "discord": "discord.exe",
-    "vscode": "code.exe",
-    "cmd": "cmd.exe",
-    "explorer": "explorer.exe"
-}
-
 # -----------------------------
 # YOUTUBE CONTROL
 # -----------------------------
@@ -68,36 +48,30 @@ APP_PROCESS_NAMES = {
 def youtube_control(action, query=None):
     try:
         if action == "play":
-            url = f"https://www.youtube.com/results?search_query={query.replace(' ', '+')}"
+            url = f"https://www.youtube.com/results?search_query={query.replace(' ','+')}"
             webbrowser.open(url)
-            time.sleep(4)
-            pyautogui.press("tab")
-            pyautogui.press("tab")
-            pyautogui.press("enter")
-            return True, f"Playing {query} on YouTube, sir."
+            return True, f"Opening YouTube search for {query}, boss."
 
         elif action == "search":
-            url = f"https://www.youtube.com/results?search_query={query.replace(' ', '+')}"
+            url = f"https://www.youtube.com/results?search_query={query.replace(' ','+')}"
             webbrowser.open(url)
-            return True, f"Searching YouTube for {query}, sir."
+            return True, f"Searching YouTube for {query}, boss."
 
         elif action == "open":
             webbrowser.open("https://www.youtube.com")
-            return True, "Opening YouTube, sir."
+            return True, "Opening YouTube, boss."
 
     except Exception as e:
         return False, str(e)
 
-
 # -----------------------------
-# GOOGLE SEARCH + NOTE TAKING
+# GOOGLE RESEARCH + NOTE TAKING
 # -----------------------------
 
 def google_research_and_notes(query):
 
     try:
 
-        # ---------- OPEN BROWSER ----------
         driver = webdriver.Chrome(ChromeDriverManager().install())
 
         search_url = f"https://www.google.com/search?q={query.replace(' ','+')}"
@@ -106,8 +80,7 @@ def google_research_and_notes(query):
 
         time.sleep(3)
 
-        # ---------- GET FIRST RESULT ----------
-        links = driver.find_elements(By.CSS_SELECTOR, "a")
+        links = driver.find_elements(By.CSS_SELECTOR,"a")
 
         first_link = None
 
@@ -118,13 +91,12 @@ def google_research_and_notes(query):
                 break
 
         if not first_link:
-            return False,"Could not find a result, boss."
+            return False,"Could not find result."
 
         driver.get(first_link)
 
         time.sleep(4)
 
-        # ---------- SCRAPE PAGE ----------
         soup = BeautifulSoup(driver.page_source,"html.parser")
 
         paragraphs = soup.find_all("p")
@@ -139,40 +111,22 @@ def google_research_and_notes(query):
         if not notes:
             notes = "No useful text found."
 
-        # ---------- OPEN NOTEPAD ----------
-        subprocess.Popen("notepad")
-        time.sleep(2)
-
-        # ---------- TYPE NOTES ----------
-        pyautogui.write(notes[:2000], interval=0.01)
-
-        # ---------- SAVE FILE ----------
-        pyautogui.hotkey("ctrl","s")
-        time.sleep(1)
-
         filename = f"research_{int(time.time())}.txt"
 
-        pyautogui.write(filename)
+        with open(filename,"w",encoding="utf-8") as f:
+            f.write(notes)
 
-        pyautogui.press("enter")
-
-        return True,"Research completed and notes saved, boss."
+        return True,f"Research completed. Notes saved to {filename}, boss."
 
     except Exception as e:
         return False,f"Automation failed: {str(e)}"
 
 # -----------------------------
-# SCREENSHOT
+# SCREENSHOT (SERVER SAFE)
 # -----------------------------
 
 def take_screenshot():
-    try:
-        filename = f"screenshot_{int(time.time())}.png"
-        path = os.path.join(os.path.expanduser("~/Desktop"), filename)
-        pyautogui.screenshot(path)
-        return True, f"Screenshot saved to {path}, sir."
-    except:
-        return False, "Screenshot failed."
+    return False,"Screenshots not supported on cloud servers."
 
 # -----------------------------
 # LOCK COMPUTER
@@ -181,7 +135,7 @@ def take_screenshot():
 def lock_pc():
     if SYSTEM == "windows":
         ctypes.windll.user32.LockWorkStation()
-        return True, "Locking computer, sir."
+        return True,"Locking computer, boss."
 
 # -----------------------------
 # OPEN FOLDER
@@ -190,116 +144,115 @@ def lock_pc():
 def open_folder(path):
     try:
         subprocess.Popen(f'explorer "{path}"')
-        return True, f"Opening folder {path}, sir."
+        return True,f"Opening folder {path}"
     except:
-        return False, "Failed to open folder."
+        return False,"Failed to open folder."
 
 # -----------------------------
 # CREATE FILE
 # -----------------------------
 
-def create_file(path, name):
+def create_file(path,name):
     try:
-        full = os.path.join(path, name)
-        with open(full, "w") as f:
+        full=os.path.join(path,name)
+        with open(full,"w") as f:
             f.write("")
-        return True, f"File {name} created."
+        return True,f"File {name} created."
     except:
-        return False, "File creation failed."
+        return False,"File creation failed."
 
 # -----------------------------
 # LIST RUNNING APPS
 # -----------------------------
 
 def list_running_apps():
-    processes = []
+
+    processes=[]
+
     for proc in psutil.process_iter(['name']):
         processes.append(proc.info['name'])
-    return True, processes
+
+    return True,processes
 
 # -----------------------------
 # KILL PROCESS
 # -----------------------------
 
 def kill_process(name):
+
     try:
-        subprocess.run(f"taskkill /f /im {name}", shell=True)
-        return True, f"{name} terminated."
+        subprocess.run(f"taskkill /f /im {name}",shell=True)
+        return True,f"{name} terminated."
     except:
-        return False, "Failed to kill process."
+        return False,"Failed to kill process."
 
 # -----------------------------
 # EMPTY RECYCLE BIN
 # -----------------------------
 
 def empty_recycle_bin():
+
     try:
-        if SYSTEM == "windows":
-            subprocess.run("PowerShell.exe Clear-RecycleBin -Force", shell=True)
-            return True, "Recycle bin emptied."
+        if SYSTEM=="windows":
+            subprocess.run("PowerShell.exe Clear-RecycleBin -Force",shell=True)
+            return True,"Recycle bin emptied."
     except:
-        return False, "Failed."
+        return False,"Failed."
 
 # -----------------------------
 # WIFI CONTROL
 # -----------------------------
 
 def wifi_control(action):
+
     try:
-        if action == "off":
-            subprocess.run("netsh interface set interface Wi-Fi disable", shell=True)
-        elif action == "on":
-            subprocess.run("netsh interface set interface Wi-Fi enable", shell=True)
-        return True, f"WiFi turned {action}, sir."
+        if action=="off":
+            subprocess.run("netsh interface set interface Wi-Fi disable",shell=True)
+        elif action=="on":
+            subprocess.run("netsh interface set interface Wi-Fi enable",shell=True)
+
+        return True,f"WiFi turned {action}"
     except:
-        return False, "WiFi control failed."
+        return False,"WiFi control failed."
 
 # -----------------------------
 # MEDIA CONTROL
 # -----------------------------
 
 def media_control(action):
-    try:
-        if action == "play":
-            pyautogui.press("playpause")
-        elif action == "next":
-            pyautogui.press("nexttrack")
-        elif action == "previous":
-            pyautogui.press("prevtrack")
-        return True, f"Media {action}, sir."
-    except:
-        return False, "Media control failed."
+
+    return False,"Media control not supported on server."
 
 # -----------------------------
 # TIMER
 # -----------------------------
 
 def set_timer(seconds):
-    print(f"Timer started for {seconds} seconds.")
+
+    print(f"Timer started for {seconds} seconds")
+
     time.sleep(seconds)
-    return True, "Timer finished, sir."
+
+    return True,"Timer finished."
 
 # -----------------------------
-# CAMERA OPEN
+# CAMERA
 # -----------------------------
 
 def open_camera():
-    try:
-        subprocess.run("start microsoft.windows.camera:", shell=True)
-        return True, "Opening camera, sir."
-    except:
-        return False, "Camera failed."
+
+    return False,"Camera access not available on cloud."
 
 # -----------------------------
 # SYSTEM INFO
 # -----------------------------
 
 def full_system_info():
-    info = {
-        "cpu": psutil.cpu_percent(),
-        "ram": psutil.virtual_memory().percent,
-        "disk": psutil.disk_usage('/').percent
+
+    info={
+        "cpu":psutil.cpu_percent(),
+        "ram":psutil.virtual_memory().percent,
+        "disk":psutil.disk_usage('/').percent
     }
 
-    return True, info
-
+    return True,info
