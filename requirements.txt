@@ -7,5 +7,6 @@ psutil
 screen-brightness-control
 SpeechRecognition
 gunicorn
+pyautogui
 
 
