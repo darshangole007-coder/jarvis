@@ -20,6 +20,11 @@ import requests
 
 SYSTEM = platform.system().lower()
 
+pyautogui = None
+
+if os.environ.get("DISPLAY"):
+    import pyautogui
+    
 # -----------------------------
 # APP REGISTRY
 # -----------------------------
@@ -296,4 +301,5 @@ def full_system_info():
         "ram": psutil.virtual_memory().percent,
         "disk": psutil.disk_usage('/').percent
     }
+
     return True, info
