@@ -2,7 +2,6 @@ import os
 import re
 import threading
 import queue
-import pyttsx3
 import psutil
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
@@ -16,31 +15,10 @@ from memory import touch
 app = Flask(__name__)
 CORS(app)
 
-# ---------- SPEECH ENGINE ----------
-engine = pyttsx3.init()
-voices = engine.getProperty("voices")
-engine.setProperty("voice", voices[0].id)
-engine.setProperty("rate", 175)
-
-speech_queue = queue.Queue()
-
-def speaker_loop():
-    while True:
-        text = speech_queue.get()
-        if text:
-            try:
-                engine.say(text)
-                engine.runAndWait()
-            except Exception as e:
-                print(f"Speech Error: {e}")
-        speech_queue.task_done()
-
-threading.Thread(target=speaker_loop, daemon=True).start()
-
-
+# ---------- SPEAK FUNCTION (SERVER SAFE) ----------
 def speak(text):
     touch()
-    speech_queue.put(text)
+    print("Assistant:", text)   # log instead of speaking
 
 
 # ---------- COMMAND ROUTER ----------
@@ -131,10 +109,10 @@ def process_command(text: str) -> str:
 
         return msg
 
-# -----------------------------
+
+    # -----------------------------
     # GOOGLE RESEARCH + NOTES
     # -----------------------------
-
     if "search google for" in text and "notes" in text:
 
         query = text.replace("search google for","")
@@ -146,6 +124,7 @@ def process_command(text: str) -> str:
         ok,msg = google_research_and_notes(query)
 
         return msg
+
 
     # -----------------------------
     # CREATE FOLDER
@@ -163,6 +142,7 @@ def process_command(text: str) -> str:
 
         return msg
 
+
     # -----------------------------
     # CREATE VS CODE PROJECT
     # -----------------------------
@@ -178,6 +158,7 @@ def process_command(text: str) -> str:
 
         return msg
 
+
     # -----------------------------
     # SCREENSHOT
     # -----------------------------
@@ -186,6 +167,7 @@ def process_command(text: str) -> str:
         ok, msg = take_screenshot()
 
         return msg
+
 
     # -----------------------------
     # WIFI CONTROL
@@ -202,6 +184,7 @@ def process_command(text: str) -> str:
 
         return msg
 
+
     # -----------------------------
     # BRIGHTNESS
     # -----------------------------
@@ -217,6 +200,7 @@ def process_command(text: str) -> str:
 
         return msg
 
+
     # -----------------------------
     # LOCK COMPUTER
     # -----------------------------
@@ -225,6 +209,7 @@ def process_command(text: str) -> str:
         ok, msg = lock_pc()
 
         return msg
+
 
     # -----------------------------
     # MATH
@@ -238,6 +223,7 @@ def process_command(text: str) -> str:
             return f"The result is {res}, boss."
         except:
             return "Calculation error."
+
 
     # -----------------------------
     # AI FALLBACK
