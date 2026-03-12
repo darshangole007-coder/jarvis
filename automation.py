@@ -21,7 +21,6 @@ import requests
 SYSTEM = platform.system().lower()
 
 pyautogui = None
-
 if os.environ.get("DISPLAY"):
     import pyautogui
     
@@ -303,3 +302,4 @@ def full_system_info():
     }
 
     return True, info
+
